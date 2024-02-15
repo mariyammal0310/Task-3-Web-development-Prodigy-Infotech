@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Tic-Tac-Toe</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #2ecc71;
+      color: #fff;
+    }
+
+    #ticTacToeBoard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #3498db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+
+    .cell:hover {
+      background: #2980b9;
+    }
+
+    .cell.X::before,
+    .cell.O::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 80px;
+      background: #fff;
+    }
+
+    .cell.X::before {
+      transform: rotate(45deg);
+    }
+
+    .cell.O::before {
+      border-radius: 50%;
+    }
+
+    #result {
+      text-align: center;
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+
+    #playAgain {
+      background: #e74c3c;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #playAgain:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+<div id="ticTacToeBoard"></div>
+<div id="result"></div>
+<button id="playAgain">Play Again</button>
+
+<script>
+  const board = document.getElementById('ticTacToeBoard');
+  const resultDisplay = document.getElementById('result');
+  const playAgainButton = document.getElementById('playAgain');
+
+  let currentPlayer = 'X';
+  let boardState = ['', '', '', '', '', '', '', '', ''];
+  let gameActive = true;
+
+  const winningCombos = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+
+  function createBoard() {
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.addEventListener('click', () => handleCellClick(i));
+      board.appendChild(cell);
+    }
+  }
+
+  function handleCellClick(index) {
+    if (!gameActive || boardState[index] !== '') return;
+
+    boardState[index] = currentPlayer;
+    renderBoard();
+
+    if (checkWinner()) {
+      resultDisplay.textContent = `Player ${currentPlayer} wins!`;
+      gameActive = false;
+    } else if (isBoardFull()) {
+      resultDisplay.textContent = "It's a draw!";
+      gameActive = false;
+    } else {
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+  }
+
+  function renderBoard() {
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach((cell, index) => {
+      cell.textContent = boardState[index];
+      cell.classList.remove('X', 'O');
+
+      if (boardState[index] === 'X') {
+        cell.classList.add('X');
+      } else if (boardState[index] === 'O') {
+        cell.classList.add('O');
+      }
+    });
+  }
+
+  function checkWinner() {
+    for (const combo of winningCombos) {
+      const [a, b, c] = combo;
+      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+        highlightWinningCombo(combo);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function highlightWinningCombo(combo) {
+    combo.forEach(index => {
+      const cell = document.querySelector(`.cell:nth-child(${index + 1})`);
+      cell.style.background = '#2ecc71';
+      cell.style.color = '#fff';
+    });
+  }
+
+  function isBoardFull() {
+    return boardState.every(cell => cell !== '');
+  }
+
+  function resetGame() {
+    currentPlayer = 'X';
+    boardState = ['', '', '', '', '', '', '', '', ''];
+    gameActive = true;
+    resultDisplay.textContent = '';
+    document.querySelectorAll('.cell').forEach(cell => {
+      cell.style.background = '#3498db';
+      cell.style.color = '#fff';
+    });
+    renderBoard();
+  }
+
+  createBoard();
+
+  playAgainButton.addEventListener('click', resetGame);
+</script>
+
+</body>
+</html>
